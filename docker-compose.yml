@@ -1,0 +1,71 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: user-management
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d # Adicione esta linha
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./user-management-api
+      dockerfile: Dockerfile
+    container_name: backend
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://admin:admin@postgres:5432/user-management?schema=public
+      JWT_SECRET: teste123
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./user-management-front
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3001:3001"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+      NODE_ENV: production
+      PORT: 3001
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: on-failure:3
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:3001"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

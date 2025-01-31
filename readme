@@ -1,0 +1,104 @@
+# Sistema de Gerenciamento de Usuários
+
+Sistema full-stack para gerenciamento de usuários com autenticação JWT.
+
+## 🚀 Início Rápido com Docker
+
+### Pré-requisitos
+
+- Docker
+- Docker Compose
+- Git
+
+### 1. Clone o Repositório
+
+git clone <url-do-repositorio>
+cd user-management-api
+cd user-management-front
+
+### 2. Configuração do Ambiente
+
+Crie um arquivo `.env` na raiz do projeto:
+
+DATABASE_URL="postgresql://admin:admin@localhost:5432/user-management?schema=public"
+
+### 3. Executando com Docker Compose
+
+docker-compose up -d
+
+Este comando irá:
+
+- Iniciar o banco PostgreSQL
+- Construir e iniciar o backend (porta 3000)
+- Construir e iniciar o frontend (porta 3001)
+
+## 📡 Testando a Aplicação
+
+### Interface Web
+
+Acesse: `http://localhost:3001`
+
+### Swagger Documentation
+
+Acesse: `http://localhost:3000/api/docs`
+
+### Endpoints da API
+
+#### Autenticação
+
+http
+POST http://localhost:3000/auth/login
+
+Content-Type: application/json
+{
+"email": "teste@teste.com"
+}
+
+#### Usuários
+
+Listar usuários
+GET http://localhost:3000/users
+GET http://localhost:3000/users/:id
+
+---
+
+Atualizar usuário
+PATCH http://localhost:3000/users/:id
+Content-Type: application/json
+{
+"name": "João Silva",
+"email": "joao@exemplo.com",
+"birthDate": "1990-01-01",
+"status": true
+}
+
+---
+
+Apagar usuário
+DELETE http://localhost:3000/users/:id
+
+---
+
+Criar usuário
+POST http://localhost:3000/users
+
+Content-Type: application/json
+{
+"name": "João Silva",
+"email": "joao@exemplo.com",
+"birthDate": "1990-01-01",
+"status": true
+}
+
+### Parar os Containers
+
+docker-compose down
+
+# Construir as imagens
+
+docker build -t user-management-api ./user-management-api
+docker build -t user-management-front ./user-management-front
+
+# Executar os containers
+
+docker-compose up -d --build
